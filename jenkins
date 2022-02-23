@@ -1,0 +1,136 @@
+pipeline {
+  agent any
+  tools {
+    nodejs 'nodejspipeline {
+  agent any
+  tools {
+    nodejs 'nodejs'
+  }
+  options {
+    // This is required if you want to clean before build
+    skipDefaultCheckout(true)
+  }
+  stages {
+     stage('GitPull') {
+      steps {
+        // Clean before build
+        cleanWs()
+        git branch: 'develop',
+        credentialsId: 'GitHub_Access',
+        url: 'https://github.com/coppermobile/ThatsMyJam_API.git'
+      }
+    }
+ 
+    stage('Code Analysis') {
+      steps {
+        script {
+   
+          withSonarQubeEnv('SonarQubeScanner') {
+            sh "${tool("SonarQubeScanner")}/bin/sonar-scanner \
+  -Dsonar.projectKey=ThatsMyJam_API \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=https://analysis.qapro.co.in \
+  -Dsonar.login=9263e1d6f9d82ab5f1fb1829b9fd53c71a01bbd5"
+          }
+        }
+      }
+    }
+     stage("Quality Gate") {
+       steps {
+         echo "Quality gate Passed"
+      }
+     }
+ 
+  stage('Code Build') {
+      steps {
+        sh 'npm install'
+       
+      }
+    }  
+     stage('Unit Testing') {
+      steps {
+       echo "Unit Testing Code Goes Here"
+       
+      }
+    }
+    stage('Project Deployment') {
+      steps {
+       sshagent(['DEV-TMJ-APP-SERVER'])
+                 {
+               
+                    sh "ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.69"
+                    sh "echo pwd"
+                     //sh "ssh -o StrictHostKeyChecking=no ubuntu@172.31.13.234 docker run -d -p 80:80 --name docker-react abhisekhranjan123/docker-react:${BUILD_NUMBER}"
+                }
+       
+      }
+    }
+}
+}
+ 
+
+
+  }
+  options {
+    // This is required if you want to clean before build
+    skipDefaultCheckout(true)
+  }
+   stages {
+     stage('GitPull') {
+      steps {
+        // Clean before build
+        cleanWs()
+        git branch: 'develop',
+        credentialsId: 'GitHub_Access',
+        url: 'https://github.com/coppermobile/ThatsMyJam_API.git'
+      }
+    }
+ 
+    stage('Code Analysis') {
+      steps {
+        script {
+   
+          withSonarQubeEnv('SonarQubeScanner') {
+            sh "${tool("SonarQubeScanner")}/bin/sonar-scanner \
+  -Dsonar.projectKey=ThatsMyJam_API \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=https://analysis.qapro.co.in \
+  -Dsonar.login=9263e1d6f9d82ab5f1fb1829b9fd53c71a01bbd5"
+          }
+        }
+      }
+    }
+     stage("Quality Gate") {
+       steps {
+         echo "Quality gate Passed"
+      }
+     }
+ 
+  stage('Code Build') {
+      steps {
+        sh 'npm install'
+       
+      }
+    }  
+     stage('Unit Testing') {
+      steps {
+       echo "Unit Testing Code Goes Here"
+       
+      }
+    }
+    stage('Project Deployment') {
+      steps {
+       sshagent(['DEV-TMJ-APP-SERVER'])
+                 {
+               
+                    sh "ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.69"
+                    sh "echo pwd"
+                     //sh "ssh -o StrictHostKeyChecking=no ubuntu@172.31.13.234 docker run -d -p 80:80 --name docker-react abhisekhranjan123/docker-react:${BUILD_NUMBER}"
+                }
+       
+      }
+    }
+}
+}
+ 
+
